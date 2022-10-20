@@ -15,40 +15,6 @@ from torch.nn.functional import normalize
 import torch_geometric.transforms as T
 from torch_geometric.utils.undirected import is_undirected, to_undirected
 from torch_sparse import coalesce
-from sklearn.preprocessing import label_binarize
-import scipy.io
-
-
-def chameleon():
-    dataset = scipy.io.loadmat('./data/squirrel.mat')
-    x_tensor = torch.tensor(dataset['node_feat'], dtype=torch.float32)
-    y_tensor = torch.tensor(dataset['label'], dtype=torch.long)
-    edge_index = torch.tensor(dataset['edge_index'], dtype=torch.long)
-    data = Data(x=x_tensor, y=y_tensor, edge_index=edge_index)
-    return data
-
-
-def penn94():
-    mat = scipy.io.loadmat('./data/Penn94.mat')
-    A = mat['A']
-    metadata = mat['local_info']
-    edge_index = torch.tensor(A.nonzero(), dtype=torch.long)
-    metadata = metadata.astype(np.int)
-    label = metadata[:, 1] - 1  # gender label, -1 means unlabeled
-    y_tensor = torch.tensor(np.maximum(label, 0), dtype = torch.long)
-
-    # make features into one-hot encodings
-    feature_vals = np.hstack(
-        (np.expand_dims(metadata[:, 0], 1), metadata[:, 2:]))
-    features = np.empty((A.shape[0], 0))
-    for col in range(feature_vals.shape[1]):
-        feat_col = feature_vals[:, col]
-        feat_onehot = label_binarize(feat_col, classes=np.unique(feat_col))
-        features = np.hstack((features, feat_onehot))
-
-    node_feat = torch.tensor(features, dtype=torch.float)
-    data = Data(x=node_feat, y=y_tensor, edge_index=edge_index)
-    return data
 
 
 def adj_normalize(mx):
@@ -222,33 +188,9 @@ class WebKB(InMemoryDataset):
         return '{}()'.format(self.name)
 
 
-def synthetic_dataset():
-    feature = []
-    print('Synthetic dataset')
-    y = torch.cat([torch.zeros(32), torch.ones(32), torch.ones(32)*2, torch.ones(32)*3])
-    for i in range(4):
-        q = torch.ones(4)*0.08
-        q[i] = 0.2
-        p = torch.cat([torch.ones(50)*q[0], torch.ones(50)*q[1], torch.ones(50)*q[2], torch.ones(50)*q[3]])
-        for j in range(32):
-            feature.append(torch.bernoulli(p))
-    x = torch.cat([i.unsqueeze(0) for i in feature])
-    tmp = []
-    for i in range(4):
-        q = np.ones(4)*0.12
-        q[i] = 0.36
-        p = np.concatenate([np.ones(32) * q[0], np.ones(32) * q[1], np.ones(32) * q[2], np.ones(32) * q[3]])
-        for j in range(32):
-            tmp.append(np.random.choice(a=np.arange(128), size=16, replace=False, p=p / p.sum()))
-    edge_index = [np.concatenate([i * np.ones(16) for i in range(128)]), np.concatenate(tmp)]
-    data = Data(x=x, y=y.long(), edge_index=torch.tensor(edge_index, dtype=torch.long))
-    torch.save(data, '/tmp/synthetic')
-
-
 def process_data(p=None):
     name = 'cora'
-    dataset = Planetoid(root='./data/', name=name)
-    #dataset = dataset_heterophily(root='./data/', name=name, transform=T.NormalizeFeatures())
+    dataset = Planetoid(root='./data/', name=name, transform=T.NormalizeFeatures())
     data = dataset[0]
     adj = sp.coo_matrix((np.ones(data.edge_index.shape[1]), (data.edge_index[0], data.edge_index[1])),
                                 shape=(data.y.shape[0], data.y.shape[0]),
@@ -264,8 +206,6 @@ def process_data(p=None):
     power_adj_list = [normalized_adj]
     for m in range(5):
         power_adj_list.append(power_adj_list[0]*power_adj_list[m])
-    #pe = eigenvector(sp.eye(adj.shape[0]) - normalized_adj)
-    #data.x = torch.cat([data.x, pe], dim=1)
     torch.save(data.x, './dataset/' + name + '/x.pt')
     torch.save(data.y, './dataset/' + name + '/y.pt')
     torch.save(data.edge_index, './dataset/' + name + '/edge_index.pt')
@@ -348,10 +288,6 @@ def process_data(p=None):
             label = torch.cat([data.y[node_feature_id], torch.zeros(len(super_node_list))]).long()
             feature_id = torch.cat([node_feature_id, torch.tensor(super_node_list + data.y.shape[0], dtype=int)])
             assert len(feature_id) == k1+k2+2
-            '''
-            feature = data.x
-            label = data.y[node_feature_id]
-            '''
             sub_data_list.append([attn_bias, feature_id, label])
         data_list.append(sub_data_list)
 
@@ -456,10 +392,7 @@ def node_sampling(p=None):
 
             label = torch.cat([data_y[node_feature_id], torch.zeros(len(super_node_list))]).long()
             feature_id = torch.cat([node_feature_id, torch.tensor(super_node_list + data_y.shape[0], dtype=int)])
-            '''
-            feature = data.x
-            label = data.y[node_feature_id]
-            '''
+
             sub_data_list.append([attn_bias, feature_id, label])
         data_list.append(sub_data_list)
 
@@ -467,7 +400,7 @@ def node_sampling(p=None):
 
 
 if __name__ == '__main__':
-    process_data(p=np.array([0.4,0.4,0.1,0.1]))
+    process_data()
 
 
 
