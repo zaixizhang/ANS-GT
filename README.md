@@ -14,6 +14,8 @@ conda install pytorch=1.10 torchvision torchaudio -c pytorch -c nvidia
 conda install pyg=2.0.4 -c pyg -c conda-forge
 
 pip install ogb
+pip install pygsp
+pip install scipy
 
 conda clean --all
 ```
