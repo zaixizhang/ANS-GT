@@ -19,7 +19,7 @@ conda clean --all
 ```
 
 
-### Running GraphGPS
+### Running the Code
 ```bash
 conda activate gt
 python3 preprocess_data.py
