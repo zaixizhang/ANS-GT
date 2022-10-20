@@ -223,7 +223,7 @@ def main():
         print("====epoch " + str(epoch))
         train(args, model, device, train_loader, optimizer, lr_scheduler)
         lr_scheduler.step()
-        print(lr_scheduler.get_lr())
+
         print("====Evaluation")
         train_acc, train_loss = eval_train(args, model, device, train_loader)
 
