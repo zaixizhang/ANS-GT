@@ -190,7 +190,7 @@ class WebKB(InMemoryDataset):
 
 def process_data(p=None):
     name = 'cora'
-    dataset = Planetoid(root='./data/', name=name, transform=T.NormalizeFeatures())
+    dataset = Planetoid(root='./data/', name=name)
     data = dataset[0]
     adj = sp.coo_matrix((np.ones(data.edge_index.shape[1]), (data.edge_index[0], data.edge_index[1])),
                                 shape=(data.y.shape[0], data.y.shape[0]),
