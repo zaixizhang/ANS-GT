@@ -2,7 +2,6 @@ import torch
 import random
 
 def pad_1d_unsqueeze(x, padlen):
-    x = x + 1  # pad id = 0
     xlen = x.size(0)
     if xlen < padlen:
         new_x = x.new_zeros([padlen], dtype=x.dtype)
@@ -12,7 +11,6 @@ def pad_1d_unsqueeze(x, padlen):
 
 
 def pad_2d_unsqueeze(x, padlen):
-    x = x + 1  # pad id = 0
     xlen, xdim = x.size()
     if xlen < padlen:
         new_x = x.new_zeros([padlen, xdim], dtype=x.dtype)
@@ -42,7 +40,6 @@ def pad_edge_type_unsqueeze(x, padlen):
 
 
 def pad_spatial_pos_unsqueeze(x, padlen):
-    x = x + 1
     xlen = x.size(0)
     if xlen < padlen:
         new_x = x.new_zeros([padlen, padlen], dtype=x.dtype)
