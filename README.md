@@ -28,6 +28,9 @@ python3 preprocess_data.py
 sh start.sh
 ```
 
+As for larger dataset preprocessing, consider using preprocess_data_large.py.
+The graph coarsening is not used in preprocess_data_large.py due to its instability.
+
 ## Citation
 
 If you find this work useful, please cite our paper:
