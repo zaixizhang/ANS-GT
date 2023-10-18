@@ -444,7 +444,7 @@ def contract_variation_linear(G, A=None, K=10, r=0.5, mode='neighborhood'):
             return self.cost < other.cost
         
     family = []
-    W_bool = G.A + sp.sparse.eye(G.N, dtype=np.bool, format='csr')
+    W_bool = G.A + sp.sparse.eye(G.N, dtype=np.bool_, format='csr')
     if 'neighborhood' in mode:
         for i in range(N):
             #i_set = G.A[i,:].indices # get_neighbors(G, i)
@@ -476,7 +476,7 @@ def contract_variation_linear(G, A=None, K=10, r=0.5, mode='neighborhood'):
                 family.append(CandidateSet(triangle))
     
     family = SortedList(family)
-    marked = np.zeros(G.N, dtype=np.bool)
+    marked = np.zeros(G.N, dtype=np.bool_)
         
     # ----------------------------------------------------------------------------
     # Construct a (minimum weight) independent set. 
@@ -656,7 +656,7 @@ def generate_test_vectors(G, num_vectors=10, method = 'Gauss-Seidel', iterations
 
     if method == 'JC' or method == 'Jacobi':
         
-        deg = G.dw.astype(np.float)
+        deg = G.dw.astype(float)
         D = sp.sparse.diags(deg,0)
         deginv = deg**(-1)
         deginv[deginv == np.Inf] = 0
@@ -779,7 +779,7 @@ def matching_greedy(G, weights, r=0.4):
     matching = []
 
     # which vertices have been selected
-    marked = np.zeros(N, dtype=np.bool)
+    marked = np.zeros(N, dtype=np.bool_)
     
     n, n_target = N, (1-r)*N
     while (len(candidate_edges)>0):
